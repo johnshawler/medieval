@@ -12,6 +12,8 @@ out of 26. It was made from the same kit and work brief as [johnshawler/50s](htt
 | 4 | Plucked, bowed, cranked | Slides 9 and 10 | match five clues to five instruments (5) |
 | 5 | Four composers to remember | Slide 11 | match four clues to four composers (4) |
 
+Live at https://medieval.johnshawler.com (storyboard at `/storyboard.html`, videos under `/video/`).
+
 ## Use it
 
 `index.html` is the whole thing in one file. It loads three.js 0.187.0 and three Google Fonts from their CDNs, so it
@@ -69,6 +71,14 @@ python3 -m http.server 8766
 ```bash
 node tools/render.mjs 1
 ```
+
+## How it is published
+
+`cloudflare/worker.js` is the Cloudflare Worker named `medieval`, attached to `medieval.johnshawler.com`. It serves
+`index.html`, `storyboard.html` and `video/*.mp4` straight from the `main` branch of this repository and keeps a copy
+at Cloudflare's edge (five minutes for the pages, an hour for the videos). A push to `main` is what publishes; the
+Worker itself only needs redeploying if `cloudflare/worker.js` changes. Nothing else in the repository is public
+through the site.
 
 ## Facts shown
 
