@@ -26,6 +26,9 @@ block module imports on `file://`).
 `storyboard.html` is the approved storyboard: one still per beat, with timings, on-screen text, moves, camera and
 sound. A few framings changed after approval; the player is the final word.
 
+`video/` holds one MP4 of each animation: 1920x1080, 30 fps, 16 samples a frame, sound at about -15 LUFS. They were
+rendered in headless Chrome with a software renderer (no GPU was available), which changes the speed, not the picture.
+
 `WORK_BRIEF.md` is the brief this was built from, for doing the same with another deck.
 
 ## How it is put together
