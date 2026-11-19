@@ -1,0 +1,308 @@
+<title>Medieval Music Experiences</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@700&family=Work+Sans:wght@400;500;600&display=swap">
+<style>
+/* layout: a printed comic page. Chapter tabs across the top, one inked panel (the stage) in the middle, a control strip under it. */
+:root { color-scheme: light; --paper: #f7ecd6; --card: #fffaf0; --ink: #1c1622; --soft: #5a5266; --rule: #1c162233; --teal: #1c7376; --persimmon: #c9402a; --mustard: #f6b63c; --good: #1c7376; --bad: #b3261e;
+  --display: "Anton", "Impact", "Arial Narrow", sans-serif; --hand: "Caveat", "Segoe Print", cursive; --body: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.45 var(--body); padding-block: 12px 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.app { max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; line-height: 1.05; text-transform: uppercase; letter-spacing: .01em; }
+p { margin: 0; }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+h1 { font-size: clamp(20px, 2.6vw, 30px); }
+#tabs { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; justify-content: flex-end; }
+button { font: 600 14px/1.1 var(--body); color: var(--ink); background: var(--card); border: 2px solid var(--ink); border-radius: 4px; padding: 8px 12px; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+button[disabled] { opacity: .45; cursor: default; }
+.tab { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; }
+.tab b { font: 400 17px/1 var(--display); }
+.tab i { font-style: normal; font-size: 12px; font-weight: 600; color: var(--teal); font-variant-numeric: tabular-nums; }
+.tab[aria-current="true"] { background: var(--mustard); box-shadow: 3px 3px 0 var(--ink); }
+.tab .long { display: none; }
+@media (min-width: 1100px) { .tab .long { display: inline; font-weight: 500; } }
+.primary { background: var(--mustard); box-shadow: 3px 3px 0 var(--ink); }
+.primary:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+#stageBox { width: min(100%, calc((100dvh - 215px) * 16 / 9)); min-width: min(100%, 300px); margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+#chapterLine { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+#chapterLine h2 { font-size: clamp(18px, 2.2vw, 26px); }
+#chapterLine p { color: var(--soft); font-size: 13.5px; }
+#stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: #2a9d94; border: 2px solid var(--ink); border-radius: 6px; overflow: hidden; container-type: inline-size; touch-action: manipulation; }
+#stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#overlay { position: absolute; inset: 0; pointer-events: none; font-size: clamp(9.5px, 2.1cqw, 32px); }
+#overlay > * { pointer-events: auto; }
+.slip { background: var(--paper); border: .16em solid var(--ink); box-shadow: .22em .22em 0 var(--ink); font: 700 1.5em/1.1 var(--hand); padding: .25em .6em .3em; }
+#prompt { position: absolute; left: 4%; top: 6%; max-width: 62%; transform: rotate(-1deg); }
+#prompt.low { top: auto; bottom: 6%; }
+#prompt small { display: block; font: 600 .5em/1.2 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--persimmon); margin-bottom: .2em; }
+#clue { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%) rotate(.6deg); max-width: 88%; text-align: center; font-size: 1.9em; background: var(--mustard); }
+#meter { position: absolute; right: 4%; top: 6%; font: 600 .78em/1 var(--body); background: var(--ink); color: var(--paper); padding: .5em .7em; border-radius: .3em; font-variant-numeric: tabular-nums; }
+.pin { position: absolute; transform: translate(-50%, -50%); width: 2.3em; height: 2.3em; border-radius: 50%; display: grid; place-items: center; font: 400 1.5em/1 var(--display); color: #fff; border: .12em solid var(--ink); box-shadow: .14em .14em 0 var(--ink); pointer-events: none !important; }
+.pin.ok { background: var(--good); } .pin.no { background: var(--bad); }
+.pin.fade { animation: pinfade 1s steps(8) forwards; }
+@keyframes pinfade { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
+#panel { position: absolute; inset: 0; display: grid; place-items: center; background: #1c1622b8; }
+#panel > div { background: var(--paper); border: .16em solid var(--ink); box-shadow: .3em .3em 0 var(--ink); padding: 1.1em 1.3em; max-width: 78%; max-height: 90%; overflow: auto; display: flex; flex-direction: column; gap: .7em; font-size: max(.82em, 13px); }
+#panel h3 { font-size: 1.9em; }
+#panel ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: .25em; font-size: .95em; }
+#panel li::before { content: "✓ "; color: var(--good); font-weight: 700; } #panel li.no::before { content: "✗ "; color: var(--bad); }
+#panel .row { display: flex; flex-wrap: wrap; gap: .5em; }
+#panel button { font-size: max(.95em, 13px); }
+#counts { position: absolute; left: 50%; bottom: 27%; transform: translateX(-50%); display: flex; gap: 1.1em; }
+#counts span { width: 2.7em; height: 2.7em; border-radius: 50%; display: grid; place-items: center; font: 400 1.7em/1 var(--display); background: var(--card); border: .12em solid var(--ink); color: #1c162288; }
+#counts span.on { color: var(--ink); background: var(--mustard); transform: scale(1.12); } #counts span.back.on { background: #ee5a36; transform: scale(1.4); }
+#clapBtn { position: absolute; left: 50%; bottom: 5%; transform: translateX(-50%); font: 400 2em/1 var(--display); padding: .45em 1.4em; text-transform: uppercase; }
+#bigPlay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font: 400 1.7em/1 var(--display); text-transform: uppercase; padding: .6em 1.1em; }
+#loading { position: absolute; inset: 0; display: grid; place-items: center; font: 700 1.6em var(--hand); color: var(--paper); pointer-events: none; }
+#controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+#controls input[type=range] { flex: 1 1 160px; min-width: 120px; accent-color: var(--persimmon); height: 28px; }
+#time { font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; min-width: 92px; text-align: center; }
+#controls label { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; }
+#chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--soft); }
+#chips button { font-size: 13px; padding: 6px 10px; }
+#cardView { max-width: 860px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px; padding-top: 6px; }
+#cardView .sheet { background: var(--card); border: 2px solid var(--ink); border-radius: 6px; box-shadow: 5px 5px 0 var(--ink); padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+#cardView h2 { font-size: 30px; }
+.who { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.who input { font: 700 24px/1.1 var(--hand); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 4px; padding: 5px 10px; min-width: 0; flex: 1 1 220px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--soft); font-weight: 600; padding: 0 8px 6px 0; }
+td { padding: 8px 8px 8px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+td.r, th.r { text-align: right; padding-right: 0; white-space: nowrap; }
+td small { display: block; color: var(--soft); font-size: 12.5px; line-height: 1.4; }
+td small.no { color: var(--bad); }
+tfoot td { border-top: 2px solid var(--ink); font: 400 22px/1.1 var(--display); text-transform: uppercase; }
+#copyOut { width: 100%; min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 4px; padding: 8px; }
+.note { color: var(--soft); font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .pin.fade { animation-duration: .01s; } }
+</style>
+<div class="app">
+  <header class="top"><h1>Music of the Medieval Period</h1><nav id="tabs" aria-label="Chapters"></nav></header>
+  <div id="watchView">
+    <div id="stageBox">
+      <div id="chapterLine"><h2 id="chTitle"></h2><p id="chSub"></p></div>
+      <div id="stage"><canvas id="c" width="1920" height="1080"></canvas><div id="overlay"></div><div id="loading">drawing…</div></div>
+      <div id="controls">
+        <button id="play" type="button" class="primary" aria-label="Play">Play</button>
+        <input id="scrub" type="range" min="0" max="1" step="0.001" value="0" aria-label="Scrub through the animation">
+        <span id="time">0.0 / 0.0 s</span>
+        <label><input id="sound" type="checkbox" checked> Sound</label>
+        <label><input id="loop" type="checkbox" checked> Loop</label>
+        <button id="turn" type="button" class="primary">Your turn: start the check</button>
+      </div>
+      <div id="chips" aria-live="polite"></div>
+    </div>
+  </div>
+  <div id="cardView" hidden></div>
+</div>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" } }</script>
+<!--PARTS-->
+<script type="module">
+import * as THREE from 'three';
+window.THREE = THREE;
+for (const part of window.__parts) part();
+const { K, SOUND, STYLES, INKTOON } = window, snd = INKTOON.snd;
+const $ = (id) => document.getElementById(id), el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const Q = new URLSearchParams(location.search), RENDER = Q.has('render');
+const maxOf = (style) => style.check.reduce((s, st) => s + (st.type === 'pick' ? st.need : st.type === 'match' ? st.clues.length : st.type === 'clap' ? st.bars * 2 : 1), 0);
+const TOTAL = STYLES.reduce((s, st) => s + maxOf(st), 0);
+
+// ---------------------------------------------------------------- saved results (this browser only)
+const store = { name: '', results: {} };
+try { Object.assign(store, JSON.parse(localStorage.getItem('medieval-music') || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem('medieval-music', JSON.stringify(store)); } catch (e) {} };
+
+// ---------------------------------------------------------------- the stage for one chapter at a time
+const st = { ch: -1, t: 0, playing: false, mode: 'watch', scrubbing: false, live: 3 };
+let S = null, style = null, targets = {}, stopSound = null, last = 0, dirty = false, slow = 0, anchor = null;   // anchor: [clock time, piece time] playback is locked to
+const stopAudio = () => { if (stopSound) { stopSound(); stopSound = null; } };
+const startAudio = () => { stopAudio(); anchor = [performance.now() / 1000, st.t]; if ($('sound').checked && style.sound) stopSound = SOUND.live((k) => style.sound(k), st.t, { voiceover: false }); };
+
+async function loadChapter(i) {
+  pause(); leaveCheck(true); $('loading').hidden = false; $('cardView').hidden = true; $('watchView').hidden = false;
+  if (S) { S.renderer.dispose(); S.renderer.forceContextLoss(); S = null; }
+  const old = $('c'), cv = old.cloneNode(false); old.replaceWith(cv); cv.addEventListener('pointerdown', onPointer);
+  style = STYLES[i]; st.ch = i; st.t = 0;
+  // the check's reactions (a hop for right, a shake for wrong) are laid over whatever the scene's own update set
+  const wrapped = Object.assign({}, style, { build: async (S) => { const api = await style.build(S); targets = api.targets || {}; const inner = api.update; return Object.assign({}, api, { update(t) { inner(t); if (st.mode === 'check') fxApply(); } }); } });
+  S = await K.run(cv, wrapped, { samples: RENDER ? style.render.samples : st.live });
+  // every sub-render of one frame sees the same scene and the same sun (shutter 0), so its shadow map is drawn once per frame, not once per sample
+  S.renderer.shadowMap.autoUpdate = false; const seek = S.seek; S.seek = (t, n) => { S.renderer.shadowMap.needsUpdate = true; seek(t, n); };
+  window.S = S; window.seek = (t) => S.seek(t); window.DURATION = style.play;
+  $('chTitle').textContent = (i + 1) + '. ' + style.title; $('chSub').textContent = 'Watch it, then answer: ' + style.question;
+  $('scrub').max = style.play; draw(); $('loading').hidden = true; renderTabs();
+  showBigPlay();
+}
+window.loadChapter = loadChapter;
+
+function draw() {
+  const t0 = performance.now(); S.seek(st.t, RENDER ? undefined : st.live);
+  if (st.playing) { slow = slow * 0.9 + (performance.now() - t0) * 0.1; if (slow > 30 && st.live > 1) { st.live--; slow = 0; } }
+  $('scrub').value = st.t; $('time').textContent = st.t.toFixed(1) + ' / ' + style.play.toFixed(1) + ' s';
+}
+function play() { if (st.mode !== 'watch' || !S) return; if (st.t >= style.play - 0.05) st.t = 0; st.playing = true; $('play').textContent = 'Pause'; $('play').setAttribute('aria-label', 'Pause'); hideBigPlay(); startAudio(); }
+function pause() { st.playing = false; $('play').textContent = 'Play'; $('play').setAttribute('aria-label', 'Play'); stopAudio(); }
+function tick(now) {
+  requestAnimationFrame(tick); const dt = Math.min(0.1, (now - last) / 1000); last = now; if (!S) return;
+  if (st.mode === 'watch' && st.playing && !st.scrubbing) {
+    st.t = anchor[1] + performance.now() / 1000 - anchor[0];          // the picture follows the clock the sound runs on, so slow frames drop instead of drifting
+    if (st.t >= style.play) { if ($('loop').checked) { st.t = 0; startAudio(); } else { st.t = style.play - 1e-3; draw(); pause(); return; } }
+    draw();
+  } else if (st.mode === 'check' && (dirty || fx.some((f) => performance.now() / 1000 - f.t0 < 0.9))) { dirty = false; S.seek(style.quizAt, 3); if (clap) clapFrame(); }
+  else if (st.mode === 'check' && clap) clapFrame();
+}
+$('play').onclick = () => (st.playing ? pause() : play());
+$('scrub').addEventListener('input', () => { st.scrubbing = true; stopAudio(); st.t = Math.min(+$('scrub').value, style.play - 1e-3); hideBigPlay(); draw(); });
+$('scrub').addEventListener('change', () => { st.scrubbing = false; if (st.playing) startAudio(); });
+$('sound').onchange = () => { if (!$('sound').checked) stopAudio(); else if (st.playing) startAudio(); };
+document.addEventListener('visibilitychange', () => { if (document.hidden && st.playing) pause(); });
+function showBigPlay() { hideBigPlay(); if (RENDER) return; const b = el('button', 'primary', '▶ Play'); b.id = 'bigPlay'; b.type = 'button'; b.onclick = play; $('overlay').append(b); }
+function hideBigPlay() { const b = $('bigPlay'); if (b) b.remove(); }
+document.addEventListener('keydown', (e) => { if (e.code !== 'Space' || /INPUT|BUTTON|TEXTAREA/.test(e.target.tagName)) return; e.preventDefault(); if (clap && clap.running) clapTap(e); else if (st.mode === 'watch') (st.playing ? pause() : play()); });
+
+// ---------------------------------------------------------------- tabs and score card
+function renderTabs() {
+  const nav = $('tabs'); nav.textContent = '';
+  STYLES.forEach((s, i) => { const b = el('button', 'tab'); b.type = 'button'; b.append(el('b', '', String(i + 1)), el('span', 'long', s.title)); const r = store.results[s.id]; if (r) b.append(el('i', '', r.score + '/' + r.max)); b.setAttribute('aria-current', String(i === st.ch && $('cardView').hidden)); b.title = s.title; b.onclick = () => loadChapter(i); nav.append(b); });
+  const c = el('button', 'tab'); c.type = 'button'; c.append(el('span', '', 'Score card')); c.setAttribute('aria-current', String(!$('cardView').hidden)); c.onclick = showCard; nav.append(c);
+}
+function summaryText() {
+  const lines = ['Music of the Medieval Period: score card', 'Name: ' + (store.name || '(not given)'), 'Date: ' + new Date().toLocaleString(), '']; let got = 0;
+  STYLES.forEach((s, i) => { const r = store.results[s.id]; if (r) got += r.score; lines.push((i + 1) + '. ' + s.title + ': ' + (r ? r.score + ' / ' + r.max + (r.attempts > 1 ? ' (attempt ' + r.attempts + ')' : '') : 'not done')); if (r) r.items.forEach((it) => lines.push('   ' + (it.ok ? '[x] ' : '[ ] ') + it.text)); });
+  lines.push('', 'Total: ' + got + ' / ' + TOTAL + ' (' + Math.round(got / TOTAL * 100) + '%)'); return lines.join('\n');
+}
+function showCard() {
+  pause(); leaveCheck(true); $('watchView').hidden = true; const v = $('cardView'); v.hidden = false; v.textContent = '';
+  const sheet = el('div', 'sheet'); sheet.append(el('h2', '', 'Score card'));
+  const who = el('div', 'who'), lab = el('label', '', 'Name'), inp = el('input'); inp.id = 'studentName'; inp.type = 'text'; inp.autocomplete = 'name'; inp.placeholder = 'write your name'; inp.value = store.name || ''; lab.htmlFor = 'studentName'; lab.style.fontWeight = '600';
+  inp.oninput = () => { store.name = inp.value; save(); }; who.append(lab, inp); sheet.append(who);
+  const table = el('table'), head = el('tr'); ['#', 'Experience', 'Score'].forEach((h, i) => head.append(el('th', i === 2 ? 'r' : '', h))); const thead = el('thead'); thead.append(head); const body = el('tbody'); let got = 0, done = 0;
+  STYLES.forEach((s, i) => { const r = store.results[s.id], tr = el('tr'), td = el('td'); td.append(document.createTextNode(s.title));
+    if (r) { got += r.score; done++; r.items.forEach((it) => td.append(el('small', it.ok ? '' : 'no', (it.ok ? '✓ ' : '✗ ') + it.text))); if (r.attempts > 1) td.append(el('small', '', 'attempt ' + r.attempts)); }
+    tr.append(el('td', '', String(i + 1)), td, el('td', 'r', r ? r.score + ' / ' + r.max : 'not done')); body.append(tr); });
+  const foot = el('tfoot'), ft = el('tr'); ft.append(el('td'), el('td', '', 'Total'), el('td', 'r', got + ' / ' + TOTAL + '  ·  ' + Math.round(got / TOTAL * 100) + '%')); foot.append(ft); table.append(thead, body, foot); sheet.append(table);
+  sheet.append(el('p', 'note', done < STYLES.length ? (STYLES.length - done) + ' of ' + STYLES.length + ' checks still to do. Open a chapter, watch it, then press "Your turn".' : 'All five checks done. Show this card to your teacher, or copy it below.'));
+  const row = el('div', 'who'), copy = el('button', 'primary', 'Copy results as text'), reset = el('button', '', 'Clear this card'); copy.type = reset.type = 'button';
+  const out = el('textarea'); out.id = 'copyOut'; out.readOnly = true; out.hidden = true; out.setAttribute('aria-label', 'Results as text');
+  copy.onclick = async () => { const text = summaryText(); out.value = text; try { await navigator.clipboard.writeText(text); copy.textContent = 'Copied'; } catch (e) { out.hidden = false; out.focus(); out.select(); copy.textContent = 'Select the text below and copy it'; } };
+  let armed = false; reset.onclick = () => { if (!armed) { armed = true; reset.textContent = 'Press again to clear all scores'; return; } store.results = {}; store.name = ''; save(); showCard(); };
+  row.append(copy, reset); sheet.append(row, out); v.append(sheet); renderTabs();
+}
+
+// ---------------------------------------------------------------- the check: tap the objects in the scene
+let check = null, bases = {}, boxes = {}, fx = [], clap = null;
+const ray = new THREE.Raycaster(), v2 = new THREE.Vector2(), v3 = new THREE.Vector3();
+const objsOf = (id) => [].concat(targets[id] || []);
+function fxApply() {
+  for (const id in bases) for (const b of bases[id]) { b.o.position.copy(b.p); b.o.quaternion.copy(b.q); b.o.scale.copy(b.s); }
+  const now = performance.now() / 1000;
+  for (const f of fx) { const u = Math.floor((now - f.t0) * 15) / 15; if (u < 0 || u > 0.85 || !bases[f.id]) continue;   // reactions are drawn on twos as well
+    for (const b of bases[f.id]) { if (f.ok) { b.o.position.y += f.amp * Math.abs(Math.sin(u * 9)) * Math.exp(-4 * u); b.o.scale.multiplyScalar(1 + 0.1 * Math.sin(u * 18) * Math.exp(-5 * u)); } else b.o.position.x += 0.14 * Math.sin(u * 45) * Math.exp(-5 * u); } }
+}
+const react = (id, ok, amp = 0.45) => { fx = fx.filter((f) => performance.now() / 1000 - f.t0 < 0.9); fx.push({ id, ok, amp, t0: performance.now() / 1000 }); dirty = true; };
+function beep(ok) { if (!$('sound').checked) return; try { const stop = SOUND.live((k) => { if (ok) k.play('success', 0, { gain: 0.8 }); else k.play('error', 0, { gain: 1.1 }); }, 0, {}); setTimeout(stop, 1800); } catch (e) {} }
+function screenOf(id) { const b = boxes[id]; b.getCenter(v3); v3.y = b.max.y; v3.project(S.camera); return [(v3.x * 0.5 + 0.5) * 100, Math.max(8, (-v3.y * 0.5 + 0.5) * 100)]; }
+function pin(id, ok, keep) { const [x, y] = screenOf(id), p = el('div', 'pin ' + (ok ? 'ok' : 'no') + (keep ? '' : ' fade'), ok ? '✓' : '✗'); p.style.left = x + '%'; p.style.top = y + '%'; $('overlay').append(p); if (!keep) setTimeout(() => p.remove(), 1000); }
+function onPointer(e) {
+  if (st.mode !== 'check' || !check || check.locked) return; const stage = check.stages[check.i]; if (!stage) return;
+  if (stage.type === 'clap') { if (clap && clap.running) clapTap(e); return; }
+  if (stage.type === 'choice') return;
+  const r = e.currentTarget.getBoundingClientRect(); v2.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height * 2 - 1)); ray.setFromCamera(v2, S.camera);
+  let best = null, bd = 1e9; for (const id of Object.keys(stage.names)) { const hit = ray.ray.intersectBox(boxes[id], v3); if (hit) { const d = hit.distanceTo(ray.ray.origin); if (d < bd) { bd = d; best = id; } } }
+  if (best) answer(best);
+}
+function startCheck() {
+  if (!S || st.mode === 'check') return; pause(); hideBigPlay(); st.mode = 'watch'; S.pose = style.check[0].pose || 0; S.seek(style.quizAt, 3);          // pose the table for the check, then read where everything stands
+  bases = {}; boxes = {}; fx = [];
+  for (const id of Object.keys(targets)) { bases[id] = objsOf(id).map((o) => ({ o, p: o.position.clone(), q: o.quaternion.clone(), s: o.scale.clone() })); const b = new THREE.Box3(); for (const o of objsOf(id)) { o.updateWorldMatrix(true, true); b.expandByObject(o); } boxes[id] = b.expandByScalar(0.12); }
+  st.mode = 'check'; check = { i: 0, stages: style.check, items: [], score: 0, locked: false }; $('controls').querySelectorAll('button, input').forEach((c) => (c.disabled = true)); showStage();
+}
+function leaveCheck(silent) {
+  if (clap) stopClap(); check = null; fx = []; $('overlay').textContent = ''; $('chips').textContent = ''; $('controls').querySelectorAll('button, input').forEach((c) => (c.disabled = false));
+  if (S) S.pose = 0;
+  if (st.mode === 'check') { st.mode = 'watch'; if (!silent && S) { st.t = 0; draw(); showBigPlay(); } }
+}
+$('turn').onclick = startCheck;
+function record(ok, text) { check.items.push({ ok, text }); if (ok) check.score++; $('meter').textContent = 'Score ' + check.score + ' / ' + maxOf(style); }
+function showStage() {
+  const stage = check.stages[check.i], ov = $('overlay'), chips = $('chips'); ov.textContent = ''; chips.textContent = ''; check.locked = false; dirty = true;
+  if (!stage) return finishCheck();
+  S.pose = stage.pose || 0;                                              // some questions re-pose the scene (for example, how many rows of notes are on the sheet)
+  const pr = el('div', 'slip' + (stage.low ? ' low' : '')); pr.id = 'prompt'; pr.append(el('small', '', 'Check ' + (check.i + 1) + ' of ' + check.stages.length), document.createTextNode(stage.prompt)); const meter = el('div', '', 'Score ' + check.score + ' / ' + maxOf(style)); meter.id = 'meter'; ov.append(pr, meter);
+  const quit = el('button', '', 'Back to the animation'); quit.type = 'button'; quit.onclick = () => leaveCheck();
+  if (stage.type === 'pick' || stage.type === 'match') {
+    stage.picked = new Set(); stage.ci = 0; stage.order = stage.clues ? stage.clues.map((_, i) => i) : [];
+    if (stage.shuffle !== false && stage.clues) for (let i = stage.order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [stage.order[i], stage.order[j]] = [stage.order[j], stage.order[i]]; }
+    chips.append(el('span', '', 'Tap it in the picture, or choose here:'));
+    for (const id of Object.keys(stage.names)) { const b = el('button', '', stage.names[id]); b.type = 'button'; b.dataset.id = id; b.onclick = () => answer(id); chips.append(b); }
+    if (stage.type === 'match') { const c = el('div', 'slip'); c.id = 'clue'; ov.append(c); showClue(); }
+  } else if (stage.type === 'choice') {
+    chips.append(el('span', '', 'Choose one:')); stage.options.forEach((o, i) => { const b = el('button', 'primary', o); b.type = 'button'; b.onclick = () => { if (check.locked) return; check.locked = true; const ok = i === stage.answer; record(ok, stage.prompt + ' ' + o + (ok ? '' : ' (answer: ' + stage.options[stage.answer] + ')')); beep(ok); b.style.background = ok ? 'var(--good)' : 'var(--bad)'; b.style.color = '#fff'; setTimeout(nextStage, 900); }; chips.append(b); });
+  } else if (stage.type === 'clap') setupClap(stage);
+  chips.append(quit);
+}
+function showClue() { const stage = check.stages[check.i], c = $('clue'); const [text] = stage.clues[stage.order[stage.ci]]; c.textContent = '“' + text + '”'; $('prompt').firstChild.textContent = 'Clue ' + (stage.ci + 1) + ' of ' + stage.clues.length; }
+function answer(id) {
+  if (!check || check.locked) return; const stage = check.stages[check.i];
+  if (stage.type === 'pick') { if (stage.picked.has(id)) return; stage.picked.add(id); const ok = stage.right.includes(id); record(ok, 'Picked ' + stage.names[id] + (ok ? '' : ' (not one of them)')); react(id, ok); pin(id, ok, true); beep(ok);
+    const b = $('chips').querySelector('[data-id="' + id + '"]'); if (b) b.disabled = true; if (stage.picked.size >= stage.need) { check.locked = true; setTimeout(nextStage, 1000); } }
+  else if (stage.type === 'match') { const [text, ans] = stage.clues[stage.order[stage.ci]], ok = id === ans; record(ok, '“' + text + '”: ' + stage.names[id] + (ok ? '' : ' (answer: ' + stage.names[ans] + ')')); react(id, ok); pin(id, ok, false); beep(ok);
+    check.locked = true; stage.ci++; setTimeout(() => { if (!check) return; if (stage.ci >= stage.clues.length) nextStage(); else { check.locked = false; showClue(); } }, 800); }
+}
+function nextStage() { if (!check) return; $('overlay').querySelectorAll('.pin').forEach((p) => p.remove()); check.i++; showStage(); }
+function finishCheck() {
+  const prev = store.results[style.id], max = maxOf(style); store.results[style.id] = { score: check.score, max, items: check.items, attempts: (prev ? prev.attempts : 0) + 1 }; save(); renderTabs();
+  const ov = $('overlay'), panel = el('div'), box = el('div'); panel.id = 'panel'; box.append(el('h3', '', 'You scored ' + check.score + ' out of ' + max)); const ul = el('ul'); check.items.forEach((it) => ul.append(el('li', it.ok ? '' : 'no', it.text))); box.append(ul);
+  const row = el('div', 'row'), next = el('button', 'primary', st.ch < STYLES.length - 1 ? 'Next: ' + STYLES[st.ch + 1].title : 'See the score card'), again = el('button', '', 'Try the check again'), watch = el('button', '', 'Watch again');
+  next.type = again.type = watch.type = 'button'; const ch = st.ch; next.onclick = () => (ch < STYLES.length - 1 ? loadChapter(ch + 1) : showCard()); again.onclick = () => { leaveCheck(true); startCheck(); }; watch.onclick = () => { leaveCheck(); play(); };
+  row.append(next, again, watch); box.append(row); panel.append(box); ov.append(panel); $('chips').textContent = ''; check.locked = true; next.focus();
+}
+
+// ---------------------------------------------------------------- the clap game: one bar to listen, then clap on 2 and 4
+function setupClap(stage) {
+  const ov = $('overlay'), counts = el('div'); counts.id = 'counts'; [1, 2, 3, 4].forEach((n) => counts.append(el('span', n % 2 ? '' : 'back', String(n)))); const btn = el('button', 'primary', 'Start'); btn.id = 'clapBtn'; btn.type = 'button'; ov.append(counts, btn);
+  $('chips').append(el('span', '', 'One bar to listen, then ' + stage.bars + ' bars to clap. Tap the button, the picture or the space bar.'));
+  clap = { stage, running: false, taps: [], btn }; btn.addEventListener('pointerdown', (e) => { if (clap.running) clapTap(e); else runClap(); }); btn.addEventListener('keydown', (e) => { if ((e.code === 'Enter' || e.code === 'Space') && !e.repeat) { e.preventDefault(); if (clap.running) clapTap(e); else runClap(); } });
+}
+function runClap() {
+  const B = snd.BEAT, bars = clap.stage.bars, lead = 0.25; let ctx = null, kit = null;
+  try { ctx = new (window.AudioContext || window.webkitAudioContext)(); kit = SOUND.kit(ctx, { delay: lead, master: $('sound').checked ? 0.9 : 0 }); } catch (e) { ctx = null; }
+  const base = ctx ? ctx.currentTime + lead : performance.now() / 1000 + lead;
+  Object.assign(clap, { running: true, ctx, kit, bars, taps: [], clock: () => (ctx ? ctx.currentTime - (ctx.outputLatency || 0) : performance.now() / 1000) - base, end: (1 + bars) * 4 * B });
+  if (kit) { for (let b = 0; b < (1 + bars) * 4; b++) { const t = b * B; kit.play('tick', t, { gain: 0.9, f: b % 2 ? 5200 : 3400 }); if (b % 2 === 0) kit.play('thud', t, { gain: 0.5, f: 95 }); if (b < 4 && b % 2) snd.clap(kit, t, { gain: 1 }); }
+    snd.riff(kit, 4 * B, clap.end, 'full', { gain: 0.05 }); snd.bass(kit, 4 * B, clap.end, { gain: 0.14 }); }
+  clap.btn.textContent = 'Listen…'; clap.btn.disabled = true;
+}
+function clapTap(e) { if (!clap || !clap.running) return; const late = e && e.timeStamp ? Math.max(0, Math.min(0.5, (performance.now() - e.timeStamp) / 1000)) : 0, t = clap.clock() - late; if (t < 4 * snd.BEAT - 0.2) return; clap.taps.push(t); if (clap.kit) snd.clap(clap.kit, clap.clock() + (clap.ctx.outputLatency || 0) + 0.005, { gain: 1.1 }); react(clap.stage.target, true, 0.25); }
+function clapFrame() {
+  if (!clap || !clap.running) return; const t = clap.clock(), B = snd.BEAT, beat = Math.floor(t / B + 1e-3), spans = $('counts') ? $('counts').children : [];
+  for (let i = 0; i < spans.length; i++) spans[i].classList.toggle('on', t >= 0 && beat % 4 === i && t - beat * B < B * 0.6);
+  if (t >= 4 * B - 0.2 && clap.btn.disabled) { clap.btn.disabled = false; clap.btn.textContent = 'Clap!'; }
+  if (t > clap.end + 0.25) scoreClap();
+}
+// Scoring: a clap within 0.16 s of beat 2 or 4 scores once; a clap on beat 1 or 3 cancels one of them; claps between beats are ignored.
+function scoreTaps(taps, bars) {
+  const B = snd.BEAT, tol = 0.16, hit = {}; let off = 0;
+  for (const t of taps) { const b = Math.round(t / B); if (b < 4 || b >= (1 + bars) * 4 || Math.abs(t - b * B) > tol) continue; if (b % 2 === 0) off++; else hit[b] = true; }
+  const want = []; for (let b = 4; b < (1 + bars) * 4; b++) if (b % 2) want.push(b);
+  let cancel = Math.min(off, want.filter((b) => hit[b]).length);
+  return want.map((b) => { const where = 'Clap on beat ' + (b % 4 + 1) + ' of bar ' + Math.floor(b / 4); if (!hit[b]) return { ok: false, text: where + ' (missed)' }; if (cancel > 0) { cancel--; return { ok: false, text: where + ' (cancelled by a clap on beat 1 or 3)' }; } return { ok: true, text: where }; });
+}
+window.scoreTaps = scoreTaps;
+function scoreClap() {
+  const items = scoreTaps(clap.taps, clap.bars); items.forEach((it) => record(it.ok, it.text));
+  beep(items.filter((it) => it.ok).length >= items.length - 1); stopClap(); check.locked = true; setTimeout(nextStage, 900);
+}
+function stopClap() { if (clap && clap.ctx) { const c = clap.ctx; setTimeout(() => { try { c.close(); } catch (e) {} }, 600); } clap = null; }
+
+// ---------------------------------------------------------------- video render hooks (headless: ?render&chapter=N)
+window.clapClock = () => (clap && clap.running ? clap.clock() : null);   // lets a test (or a teacher's script) read the count
+window.renderAudio = async () => { const r = await SOUND.renderOffline((k) => style.sound(k), style.play, 48000, { voiceover: false }); const u8 = new Uint8Array(r.inter.buffer); let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return { b64: btoa(s), peak: r.peak, frames: r.frames }; };
+
+if (document.fonts) await Promise.all(['260px "Anton"', '700 150px "Caveat"'].map((f) => document.fonts.load(f).catch(() => null)));
+renderTabs();
+try { await loadChapter(Math.max(0, Math.min(STYLES.length - 1, (+Q.get('chapter') || 1) - 1))); window.READY = true; requestAnimationFrame(tick); }
+catch (e) { $('loading').textContent = 'This browser could not start the 3D picture (' + (e && e.message ? e.message : e) + ').'; window.ERR = String(e && e.stack || e); }
+</script>

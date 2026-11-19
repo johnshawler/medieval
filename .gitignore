@@ -1,0 +1,5 @@
+out/
+lib/three.*.js
+medieval.html
+node_modules/
+*.f32

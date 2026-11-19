@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@700&display=swap">
+<script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script></head><body>
+<script type="module">
+import * as THREE from 'three';
+window.THREE = THREE;
+const load = (src) => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+for (const f of ['lib/stage.js', 'lib/ink.js', 'lib/props.js', 'lib/props_medieval.js', 'lib/tunes.js', 'lib/tunes_medieval.js', 'scenes/m1.js', 'scenes/m2.js', 'scenes/m3.js', 'scenes/m4.js', 'scenes/m5.js']) await load(f);
+window.META = STYLES.map((s) => ({ id: s.id, title: s.title, slides: s.slides, question: s.question, play: s.play, beats: s.beats, quiz: s.quiz }));
+window.renderStyle = async (id, samples = 16) => {
+  const style = STYLES.find((s) => s.id === id), cv = document.createElement('canvas'); cv.width = 1920; cv.height = 1080;
+  const S = await K.run(cv, style, { samples }), small = document.createElement('canvas'); small.width = 960; small.height = 540; const ctx = small.getContext('2d'), out = [];
+  for (const t of [...style.beats.map((b) => b.key), style.quiz.key]) { S.pose = t === style.quiz.key && style.check[0].pose ? style.check[0].pose : 0; S.seek(t); ctx.drawImage(cv, 0, 0, 960, 540); out.push(small.toDataURL('image/jpeg', 0.84)); }
+  S.renderer.dispose(); S.renderer.forceContextLoss(); return out;
+};
+window.READY = true;
+</script></body></html>

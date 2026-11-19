@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@700&display=swap">
+<script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
+<style>body{margin:0;background:#222}canvas{width:960px;height:540px;display:block}</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+import * as THREE from 'three';
+window.THREE = THREE;
+const q = new URLSearchParams(location.search), load = (src) => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+for (const f of ['lib/stage.js', 'lib/ink.js', 'lib/props.js', 'lib/props_medieval.js', 'lib/tunes.js', 'lib/tunes_medieval.js', ...(q.get('js') || 'scenes/sheet.js').split(',')]) await load(f);
+const style = STYLES.find((s) => s.id === (q.get('style') || 'sheet')) || STYLES[0];
+try { const S = await K.run(document.getElementById('c'), style, { samples: +(q.get('samples') || 16) });
+  window.S = S; window.seek = (t) => S.seek(t); window.DURATION = style.duration; S.seek(+(q.get('t') || 0)); window.READY = true; } catch (e) { window.ERR = String(e.stack || e); console.error(e); }
+</script></body></html>
