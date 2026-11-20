@@ -36,10 +36,14 @@ function parseRange(header, size) {
 
 export default {
   async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.protocol === 'http:') {
+      url.protocol = 'https:';
+      return Response.redirect(url.toString(), 301);
+    }
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return plain(405, 'Method not allowed', { allow: 'GET, HEAD' });
     }
-    const url = new URL(request.url);
     const path = url.pathname === '/' ? '/index.html' : url.pathname;
     const route = ROUTES.find((r) => r.test.test(path));
     if (!route) return plain(404, 'Not found');
